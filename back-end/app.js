@@ -1,83 +1,46 @@
 const express = require('express');
+// importation du module ("fs") de Node qui permet de travailler sur les fichiers
 const fs = require('fs/promises');
+const mongoose = require('mongoose');
+
+mongoose.connect(
+  'mongodb+srv://cprtt:CPLIWiR30XScB9Hd@cluster0.tu90xcy.mongodb.net/?retryWrites=true&w=majority',
+  {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  },
+)
+  .then(() => console.log('Connexion à MongoDB réussie !'))
+  .catch(() => console.log('Connexion à MongoDB échouée !'));
 
 const app = express();
 
+// Middleware qui intercepte les requêtes JSON et les mets à dispo dans l'objet req.body
+app.use(express.json());
+
+// Gestion du CORS
 app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content, Accept, Content-Type, Authorization');
-  res.setHeader('Access-Control-Allow-Methods', 'GET POST, PUT, DELETE, PATCH, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, PATCH, OPTIONS');
   next();
 });
 
-// app.use('/api/books', (req, res, next) => {
-//   const books = [
-//     {
-//       id: '1',
-//       userID: 'clc4wj5lh3gyi0ak4eq4n8syr',
-//       title: 'Milwaukee Mission',
-//       author: 'Elder Cooper',
-//       imageUrl: 'https://via.placeholder.com/206x260',
-//       year: 2021,
-//       genre: 'Policier',
-//       rating: [
-//         {
-//           userId: '1',
-//           grade: 5,
-//         },
-//         {
-//           userId: '1',
-//           grade: 5,
-//         },
-//         {
-//           userId: 'clc4wj5lh3gyi0ak4eq4n8syr',
-//           grade: 5,
-//         },
-//         {
-//           userId: '1',
-//           grade: 5,
-//         },
-//       ],
-//       averageRating: 3,
-//     },
-//     {
-//       id: '2',
-//       userID: 'clbxs3tag6jkr0biul4trzbrv',
-//       title: 'Book for Esther',
-//       author: 'Alabaster',
-//       imageUrl: 'https://via.placeholder.com/206x260',
-//       year: 2022,
-//       genre: 'Paysage',
-//       rating: [
-//         {
-//           userId: 'clbxs3tag6jkr0biul4trzbrv',
-//           grade: 4,
-//         },
-//         {
-//           userId: '1',
-//           grade: 5,
-//         },
-//         {
-//           userId: '1',
-//           grade: 5,
-//         },
-//         {
-//           userId: '1',
-//           grade: 5,
-//         },
-//       ],
-//       averageRating: 4.2,
-//     },
-//     // ajouter les autres données si nécessaire...
-//   ];
-//   res.status(200).json(books);
-// });
+app.post('/api/books', (req, res, next) => {
+  console.log(req.body);
+  res.status(201).json({
+    message: 'Livre ajouté!',
+  });
+});
 
 // Middleware qui récupère dynamiquement les données du fichier data.json
-app.use('/api/books', async (req, res, next) => {
+// et renvoie l'ensemble des livres
+app.get('/api/books', async (req, res, next) => {
   try {
-    // Chargez les données depuis le fichier data.json de manière asynchrone
+    // fs.readFile utilise le module Node "fs" avec la méthode readFile pour lire le fichier JSON
     const data = await fs.readFile('../public/data/data.json', 'utf8');
+    // JSON.parse est une fonction JS qui analyse une chaine de caractère JSON en objet JS
+    // Donc data contient les objets en JSON et books les objets en JS
     const books = JSON.parse(data);
     res.status(200).json(books);
   } catch (error) {
