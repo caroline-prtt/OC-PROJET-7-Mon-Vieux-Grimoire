@@ -33,6 +33,7 @@ app.use((req, res, next) => {
   next();
 });
 
+// Fait appel au routing CRUD
 app.use('/api/books', booksRoutes);
 
 module.exports = app;
