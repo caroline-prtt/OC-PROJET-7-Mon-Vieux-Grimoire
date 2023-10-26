@@ -36,6 +36,6 @@ app.use((req, res, next) => {
 
 // Fait appel routes CRUD books et user
 app.use('/api/books', booksRoutes);
-app.use('api/auth', userRoutes);
+app.use('/api/auth', userRoutes);
 
 module.exports = app;
