@@ -3,6 +3,7 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const booksRoutes = require('./routes/books');
+const userRoutes = require('./routes/user');
 
 // _CRÉATION APPLICATION EXPRESS_ //
 
@@ -33,7 +34,8 @@ app.use((req, res, next) => {
   next();
 });
 
-// Fait appel au routing CRUD
+// Fait appel routes CRUD books et user
 app.use('/api/books', booksRoutes);
+app.use('api/auth', userRoutes);
 
 module.exports = app;
