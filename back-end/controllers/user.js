@@ -20,33 +20,19 @@ exports.signup = (req, res, next) => {
     return res.status(400).json({ error: 'Inscription impossible : email ou mot de passe invalide' });
   }
 
-  // Vérifier que l'adresse mail n'est pas déjà enregistrée dans la base de données
-  User.findOne({ email: req.body.email })
-
-    .then((existingUser) => {
-      // Si email existe déjà
-      if (existingUser) {
-        console.log('Adresse email déjà enregistrée');
-        return res.status(409).json({ error: 'Adresse email déjà enregistrée' });
-      }
-
-      // Si email n'existe pas : inscription nouveau compte
-      bcrypt.hash(req.body.password, 10)
-        .then((hash) => {
-          const user = new User({ // création nouveau client
-            email: req.body.email,
-            password: hash,
-          });
-          user.save() // Pour sauvegarder dans la base de données
-            .then(() => {
-              console.log('Inscription nouveau client RÉUSSIE !');
-              return res.status(201).json({ message: 'Utilisateur créé !' });
-            })
-            .catch((error) => res.status(400).json({ error }));
+  bcrypt.hash(req.body.password, 10)
+    .then((hash) => {
+      const user = new User({ // création nouveau client
+        email: req.body.email,
+        password: hash,
+      });
+      user.save() // Pour sauvegarder dans la base de données
+        .then(() => {
+          console.log('Inscription nouveau client RÉUSSIE !');
+          return res.status(201).json({ message: 'Utilisateur créé !' });
         })
-        .catch((error) => res.status(500).json({ error }));
+        .catch((error) => res.status(400).json({ error }));
     })
-
     .catch((error) => res.status(500).json({ error }));
 };
 
