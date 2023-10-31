@@ -1,6 +1,7 @@
 /* eslint-disable consistent-return */
 /* eslint-disable no-unused-vars */
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
 // TEST VALIDITÉ FORMAT EMAIL
@@ -51,8 +52,12 @@ exports.login = (req, res, next) => {
               res.status(401).json({ message: 'Paire identifiant/mot de passe incorrect' });
             } else {
               res.status(200).json({
-                userId: user._id,
-                token: 'TOKEN',
+                userId: user.id,
+                token: jwt.sign(
+                  { userId: user._id },
+                  'RANDOM_TOKEN_SECRET',
+                  { expiresIn: '24' },
+                ),
               });
             }
           })
