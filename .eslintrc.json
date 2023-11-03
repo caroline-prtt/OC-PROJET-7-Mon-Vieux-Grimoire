@@ -18,6 +18,8 @@
     ],
     "rules": {
         "no-console":"off",
-        "prefer-template":"off"
+        "prefer-template":"off",
+        "no-underscore-dangle":"off",
+        "no-unused-vars":"off"
     }
 }
