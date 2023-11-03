@@ -17,10 +17,17 @@ exports.createBook = (req, res, next) => {
     .catch((error) => { res.status(400).json({ error }); });
 };
 
-// AFFICHER UN LIVRE
+// RÉCUPÉRATION D'UN LIVRE SELON ID
 exports.getOneBook = async (req, res, next) => {
   Book.findOne({ _id: req.params.id })
     .then((book) => res.status(200).json(book))
+    .catch((error) => res.status(400).json({ error }));
+};
+
+// RÉCUPÉRATION DES 3 LIVRES LES MIEUX NOTÉS
+exports.getBestBooks = (req, res, next) => {
+  Book.find().sort({ averageRating: -1 }).limit(3)
+    .then((books) => res.status(200).json(books))
     .catch((error) => res.status(400).json({ error }));
 };
 
