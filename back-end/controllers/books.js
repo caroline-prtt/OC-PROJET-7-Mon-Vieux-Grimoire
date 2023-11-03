@@ -17,6 +17,13 @@ exports.createBook = (req, res, next) => {
     .catch((error) => { res.status(400).json({ error }); });
 };
 
+// AFFICHER UN LIVRE
+exports.getOneBook = async (req, res, next) => {
+  Book.findOne({ _id: req.params.id })
+    .then((book) => res.status(200).json(book))
+    .catch((error) => res.status(400).json({ error }));
+};
+
 // RÉCUPÉRATION DE TOUS LES LIVRES
 exports.getAllBooks = async (req, res, next) => {
   Book.find()
