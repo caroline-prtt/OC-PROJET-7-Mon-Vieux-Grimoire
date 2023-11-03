@@ -1,23 +1,25 @@
 const fs = require('fs/promises'); // module Node pour travailler sur les fichiers
 const Book = require('../models/Book'); // importation du modèle de données Book
 
+// AJOUT D'UN NOUVEAU LIVRE
 exports.createBook = (req, res, next) => {
-  console.log(req.body);
-  res.status(201).json({
-    message: 'Livre ajouté!',
+  const bookObject = JSON.parse(req.body.book);
+  delete bookObject._id;
+  delete bookObject._userId;
+  const book = new Book({
+    ...bookObject,
+    userId: req.auth.userId,
+    imageUrl: `${req.protocol}://${req.get('host')}/images/${req.file.filename}`,
   });
+
+  book.save()
+    .then(() => { res.status(201).json({ message: 'Objet enregistré !' }); })
+    .catch((error) => { res.status(400).json({ error }); });
 };
 
+// RÉCUPÉRATION DE TOUS LES LIVRES
 exports.getAllBooks = async (req, res, next) => {
-  try {
-    // fs.readFile utilise le module Node "fs" avec la méthode readFile pour lire le fichier JSON
-    const data = await fs.readFile('../public/data/data.json', 'utf8');
-    // JSON.parse est une fonction JS qui analyse une chaine de caractère JSON en objet JS
-    // Donc data contient les objets en JSON et books les objets en JS
-    const books = JSON.parse(data);
-    res.status(200).json(books);
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: 'Erreur lors de la lecture des données' });
-  }
+  Book.find()
+    .then((books) => res.status(200).json(books))
+    .catch((error) => res.status(400).json({ error }));
 };
