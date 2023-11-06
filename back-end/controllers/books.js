@@ -1,4 +1,4 @@
-const fs = require('fs/promises'); // module Node pour travailler sur les fichiers
+const fs = require('fs'); // module Node pour travailler sur les fichiers
 const Book = require('../models/Book'); // importation du modèle de données Book
 
 // AJOUT D'UN NOUVEAU LIVRE
@@ -49,6 +49,26 @@ exports.modifyBook = (req, res, next) => {
       }
     })
     .catch((error) => res.status(400).json({ error }));
+};
+
+// SUPPRESSION D'UN LIVRE
+exports.deleteBook = (req, res, next) => {
+  Book.findOne({ _id: req.params.id })
+    .then((book) => {
+      if (book.userId != req.auth.userId) {
+        res.status(401).json({ message: 'Not authorized' });
+      } else {
+        const filename = book.imageUrl.split('/images/')[1];
+        fs.unlink(`images/${filename}`, () => {
+          Book.deleteOne({ _id: req.params.id })
+            .then(() => { res.status(200).json({ message: 'Livre supprimé !' }); })
+            .catch((error) => res.status(401).json({ error }));
+        });
+      }
+    })
+    .catch((error) => {
+      res.status(500).json({ error });
+    });
 };
 
 // RÉCUPÉRATION DE TOUS LES LIVRES
