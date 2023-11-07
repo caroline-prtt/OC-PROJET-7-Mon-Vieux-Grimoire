@@ -21,6 +21,7 @@
         "prefer-template":"off",
         "no-underscore-dangle":"off",
         "no-unused-vars":"off",
-        "eqeqeq":"off"
+        "eqeqeq":"off",
+        "max-len":"off"
     }
 }

@@ -24,6 +24,42 @@ exports.getOneBook = async (req, res, next) => {
     .catch((error) => res.status(400).json({ error }));
 };
 
+// NOTATION D'UN LIVRE
+exports.ratingBook = (req, res, next) => {
+  Book.findOne({ _id: req.params.id })
+    .then((book) => {
+      const ratingObject = {
+        userId: req.auth.userId,
+        grade: req.body.rating,
+      };
+      const newRatings = [...book.ratings]; // créé une copie du tableau des notations du livre
+      const hasRated = newRatings.some((rating) => rating.userId === req.auth.userId);
+      if (hasRated) {
+        res.status(400).json({ message: 'Vous avez déjà noté ce livre' });
+      } else {
+        newRatings.push(ratingObject); // ajout de la nouvelle note au tableau (.push)
+        const totalRatings = newRatings.length;
+        const sumRatings = newRatings.reduce(
+          (acc, rating) => acc + rating.grade,
+          0,
+        );
+        const newAverageRating = (sumRatings / totalRatings).toFixed(2); // toFixed limite à deux décimales (mais type string)
+        const newAverageRatingNumber = parseFloat(newAverageRating); // Converti en nombre à virgule (parseFloat)
+        Book.updateOne(
+          { _id: req.params.id },
+          {
+            ratings: newRatings,
+            averageRating: newAverageRatingNumber,
+            _id: req.params.id,
+          },
+        )
+          .then(() => res.status(200).json(book))
+          .catch((error) => res.status(500).json({ error }));
+      }
+    })
+    .catch((error) => res.status(404).json({ error }));
+};
+
 // RÉCUPÉRATION DES 3 LIVRES LES MIEUX NOTÉS
 exports.getBestBooks = (req, res, next) => {
   Book.find().sort({ averageRating: -1 }).limit(3)
