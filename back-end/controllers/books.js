@@ -1,6 +1,13 @@
 const fs = require('fs'); // module Node pour travailler sur les fichiers
 const Book = require('../models/Book'); // importation du modèle de données Book
 
+// RÉCUPÉRATION DE TOUS LES LIVRES
+exports.getAllBooks = async (req, res, next) => {
+  Book.find()
+    .then((books) => res.status(200).json(books))
+    .catch((error) => res.status(400).json({ error }));
+};
+
 // AJOUT D'UN NOUVEAU LIVRE
 exports.createBook = (req, res, next) => {
   const bookObject = JSON.parse(req.body.book);
@@ -21,49 +28,6 @@ exports.createBook = (req, res, next) => {
 exports.getOneBook = async (req, res, next) => {
   Book.findOne({ _id: req.params.id })
     .then((book) => res.status(200).json(book))
-    .catch((error) => res.status(400).json({ error }));
-};
-
-// NOTATION D'UN LIVRE
-exports.ratingBook = (req, res, next) => {
-  Book.findOne({ _id: req.params.id })
-    .then((book) => {
-      const ratingObject = {
-        userId: req.auth.userId,
-        grade: req.body.rating,
-      };
-      const newRatings = [...book.ratings]; // créé une copie du tableau des notations du livre
-      const hasRated = newRatings.some((rating) => rating.userId === req.auth.userId);
-      if (hasRated) {
-        res.status(400).json({ message: 'Vous avez déjà noté ce livre' });
-      } else {
-        newRatings.push(ratingObject); // ajout de la nouvelle note au tableau (.push)
-        const totalRatings = newRatings.length;
-        const sumRatings = newRatings.reduce(
-          (acc, rating) => acc + rating.grade,
-          0,
-        );
-        const newAverageRating = (sumRatings / totalRatings).toFixed(2); // toFixed limite à deux décimales (mais type string)
-        const newAverageRatingNumber = parseFloat(newAverageRating); // Converti en nombre à virgule (parseFloat)
-        Book.updateOne(
-          { _id: req.params.id },
-          {
-            ratings: newRatings,
-            averageRating: newAverageRatingNumber,
-            _id: req.params.id,
-          },
-        )
-          .then(() => res.status(200).json(book))
-          .catch((error) => res.status(500).json({ error }));
-      }
-    })
-    .catch((error) => res.status(404).json({ error }));
-};
-
-// RÉCUPÉRATION DES 3 LIVRES LES MIEUX NOTÉS
-exports.getBestBooks = (req, res, next) => {
-  Book.find().sort({ averageRating: -1 }).limit(3)
-    .then((books) => res.status(200).json(books))
     .catch((error) => res.status(400).json({ error }));
 };
 
@@ -107,9 +71,45 @@ exports.deleteBook = (req, res, next) => {
     });
 };
 
-// RÉCUPÉRATION DE TOUS LES LIVRES
-exports.getAllBooks = async (req, res, next) => {
-  Book.find()
+// RÉCUPÉRATION DES 3 LIVRES LES MIEUX NOTÉS
+exports.getBestBooks = (req, res, next) => {
+  Book.find().sort({ averageRating: -1 }).limit(3)
     .then((books) => res.status(200).json(books))
     .catch((error) => res.status(400).json({ error }));
+};
+
+// NOTATION D'UN LIVRE
+exports.ratingBook = (req, res, next) => {
+  // On extrait les valeurs userId et rating du corps de la requête
+  const { userId, rating } = req.body;
+
+  // Vérifier que la note est comprise entre 0 et 5
+  if (rating < 0 || rating > 5) {
+    return res.status(400).json({ message: 'La note doit être comprise entre 0 et 5.' });
+  }
+
+  // Puis on recherche dans les données le livre avec l'ID fourni dans les paramètres de la requête
+  Book.findOne({ _id: req.params.id })
+    .then((book) => {
+      // Vérifier si l'utilisateur a déjà noté ce livre
+      const userAlreadyRating = book.ratings.find((r) => r.userId === userId);
+      if (userAlreadyRating) {
+        return res.status(400).json({ message: 'Vous avez déjà noté ce livre.' });
+      }
+
+      // Puis on ajoute la nouvelle note au tableau "ratings"
+      book.ratings.push({ userId, grade: rating });
+
+      // Puis on met à jour la note moyenne "averageRating"
+      const totalRatings = book.ratings.length;
+      const sumRatings = book.ratings.reduce((sum, r) => sum + r.grade, 0); // méthode réduce est une fonction de réduction qui prend une fonction de rappel ((sum, r) => sum + r.grade) et un argument final (0) qui représente la valeur initiale de sum
+      const newAverageRating = sumRatings / totalRatings;
+      book.averageRating = parseFloat(newAverageRating.toFixed(2)); // parseFloat converti string en number & toFixed(2) limite à deux decimales
+
+      // Sauvegarder les modifications _ Promesse renvoyant le livre mis à jour
+      return book.save()
+        .then((updatedBook) => res.status(200).json(updatedBook))
+        .catch((error) => res.status(400).json({ error }));
+    })
+    .catch((error) => res.status(500).json({ error }));
 };
