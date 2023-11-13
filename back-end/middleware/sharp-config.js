@@ -7,7 +7,7 @@ const resizeAndConvertToWebp = (req, res, next) => {
   }
 
   sharp(req.file.path)
-    .resize(206, 260)
+    .resize(206, 260, { fit: 'cover' }) // Applique un object-fit cover
     .toFormat('webp')
     .toFile('images/' + req.file.filename.replace(/\.(jpg|jpeg|png)$/, '.webp'))
     .then(() => {
