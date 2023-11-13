@@ -8,9 +8,11 @@ const MIME_TYPES = {
 };
 
 const storage = multer.diskStorage({
+  // Définit dans quel répertoire du serveur les fichiers seront enregistrés
   destination: (req, file, callback) => {
     callback(null, 'images');
   },
+  // Définit nom du fichier : espace remplacé par underscore + horodatage
   filename: (req, file, callback) => {
     const name = file.originalname.split(' ').join('_');
     const extension = MIME_TYPES[file.mimetype];
