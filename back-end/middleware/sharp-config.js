@@ -11,6 +11,7 @@ const resizeAndConvertToWebp = (req, res, next) => {
     .toFormat('webp')
     .toFile('images/' + req.file.filename.replace(/\.(jpg|jpeg|png)$/, '.webp'))
     .then(() => {
+      // Modification du nom de fichier avec l'extension WebP
       req.file.filename = req.file.filename.replace(/\.(jpg|jpeg|png)$/, '.webp');
 
       // Supprimer le fichier d'origine après la conversion en WebP

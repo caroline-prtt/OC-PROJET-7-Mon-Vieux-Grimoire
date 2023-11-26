@@ -1,5 +1,6 @@
 const multer = require('multer');
 
+// Constante dictionnaire de type MIME
 const MIME_TYPES = {
   'image/jpg': 'jpg',
   'image/jpeg': 'jpeg',
@@ -7,6 +8,7 @@ const MIME_TYPES = {
   'image/webp': 'webp',
 };
 
+// Création de l'objet de configuration pour multer
 const storage = multer.diskStorage({
   // Définit dans quel répertoire du serveur les fichiers seront enregistrés
   destination: (req, file, callback) => {
