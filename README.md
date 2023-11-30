@@ -14,7 +14,7 @@ La mission consiste alors à développer le back-end du site appelé "Mon Vieux 
 - mettre en place le serveur et développer l'API avec NodeJS et Express
 - configurer la base de données MongoDB avec Mongoose
 
-:arrow_right: [Spécifications techniques de l'API](https://course.oc-static.com/projects/D%C3%A9veloppeur+Web/DW_P7+Back-end/DW+P7+Back-end+-+Specifications+API.pdf)
+:arrow_right: [Spécifications techniques de l'API](https://drive.google.com/file/d/1ID6LGoXaJoPCbkR2Glw_PDWO-mPh9s5e/view?usp=sharing)
 
 ## Comment lancer le projet ? 
 
